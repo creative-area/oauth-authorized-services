@@ -1,6 +1,25 @@
-.blue-creative-area {
-  color: #009cca;
+body {
+  margin-bottom: 100px;
+}
+h1 {
+  font-size: 3.8rem;
 }
 a {
   color: #009cca;
+}
+.blue-creative-area {
+  color: #009cca;
+}
+.btn-action-save {
+  margin-top: 12px;
+}
+.btn-action-close {
+  margin-top: 12px;
+  margin-left: 12px;
+}
+.no-margin-bottom {
+  margin-bottom: 0 !important;
+}
+.provider-favicon {
+  /*margin: 14px 0 0 6px;*/
 }
