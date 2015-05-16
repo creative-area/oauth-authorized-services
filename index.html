@@ -13,16 +13,15 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.96.1/js/materialize.min.js"></script>
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/store.js/1.3.14/store.min.js"></script>
+    <script src="http://labs.creative-area.net/js/ribbons.js"></script>
     <script src="providers.js"></script>
-    <script src="ribbons.js"></script>
     <script type="text/jsx" src="app.jsx"></script>
     <script type="text/jsx">
     React.render(
       <OAuthAuthorizedServicesWebsite providers={OAuthProvidersData} />,
       document.body,
       function() {
-        $( 'body' ).prepend( ribbonGitHub );
-        $( 'body' ).append( ribbonCreativeArea );
+        $( 'body' ).prepend( window.creativeAreaRibbons.github( 'creative-area/oauth-authorized-services' ) ).append( window.creativeAreaRibbons.buildAtCreativeArea() );
       }
     );
     </script>
