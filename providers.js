@@ -14,12 +14,12 @@ var OAuthProvidersData = [{
   "name": "Github",
   "url": "https://github.com/settings/applications",
   "favicon": "https://github.com/favicon.ico"
-}/*,{
+},{
   "name": "Bitbucket",
   "url": "https://bitbucket.org/account/user/[[username]]/api",
   "favicon": "https://bitbucket.org/favicon.ico",
   "username": true
-}*/,{
+},{
   "name": "Dropbox",
   "url": "https://www.dropbox.com/account#security",
   "favicon": "https://cf.dropboxstatic.com/static/images/favicon.ico"
