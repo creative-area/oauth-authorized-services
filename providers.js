@@ -27,4 +27,9 @@ var OAuthProvidersData = [{
   "name": "Evernote",
   "url": "https://www.evernote.com/AuthorizedServices.action",
   "favicon": "https://www.evernote.com/favicon.ico"
+},{
+  "name": "Trello",
+  "url": "https://trello.com/[[username]]/account",
+  "favicon": "https://trello.com/favicon.ico",
+  "username": true
 }];
