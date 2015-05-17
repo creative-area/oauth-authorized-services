@@ -28,13 +28,16 @@ var OAuthAuthorizedServicesStore = {
   kill: function() {
     store.remove( OAuthAuthorizedServicesStore.key );
   },
+  updateProvider: function( providers, index, username ) {
+    OAuthAuthorizedServicesStore.set( providers[index].name + '_username', username );
+    providers[index].username = username;
+  },
   updateProviders: function( providers ) {
     for ( var i = 0 ; i < providers.length ; i++ ) {
       if ( providers[i].username === true ) {
         var username = OAuthAuthorizedServicesStore.get( providers[i].name + '_username' );
         if ( username ) {
-          providers[i].url = providers[i].url.split( '[[username]]' ).join( username );
-          providers[i].username = false;
+          OAuthAuthorizedServicesStore.updateProvider( providers, i, username );
         }
       }
     }
@@ -50,8 +53,7 @@ var OAuthAuthorizedServicesWebsite = React.createClass({
       whyOpenedSavedState = true;
     }
     return {
-      whyOpened: whyOpenedSavedState,
-      providers: this.props.providers
+      whyOpened: whyOpenedSavedState
     };
   },
   handleWhyOpened: function(open) {
@@ -129,7 +131,8 @@ var WhyAlertInfo = React.createClass({
 var OAuthProviders = React.createClass({
   render: function() {
     var rows = [];
-    this.props.providers.forEach(function(provider) {
+    this.props.providers.forEach(function(provider, i) {
+      provider.index = i;
       rows.push(<OAuthProvider provider={provider} key={provider.name} />);
     });
     return (
@@ -154,50 +157,51 @@ var OAuthProviderUrl = React.createClass({
 });
 
 var OAuthProviderUrlWithUsername = React.createClass({
-  getInitialState: function() {
-    return {
-      formOpen: false
-    };
+  openForm: function(e) {
+    if ( this.props.provider.username !== undefined && this.props.provider.username !== true && this.props.provider.username !== '' ) {
+      // go link
+    } else {
+      e.preventDefault();
+      this.props.handleFormOpen( true );
+    }
   },
-  handleOpenForm: function(e) {
+  closeForm: function(e) {
     e.preventDefault();
-    this.setState({
-      formOpen: true
-    });
+    this.props.handleFormOpen( false );
   },
-  handleCloseForm: function(e) {
+  changeUsername: function(e) {
     e.preventDefault();
-    this.setState({
-      formOpen: false
-    });
-  },
-  handleUsername: function(e) {
-    e.preventDefault();
-    this.setState({
-      formOpen: false
-    });
+    var username = this.refs.usernameInput.getDOMNode().value;
+    OAuthAuthorizedServicesStore.updateProvider( OAuthProvidersData, this.props.provider.index, username );
+    this.props.handleFormOpen( false );
   },
   render: function() {
-    if ( this.state.formOpen ) {
+    if ( this.props.open ) {
       return (
         <div className="row no-margin-bottom">
           <div className="col s6 m9 l7">
-            <input type="text" placeholder="Username" className="no-margin-bottom" />
+            <input type="text" placeholder="Username" ref="usernameInput" className="no-margin-bottom" />
           </div>
           <div className="col s6 m3 l5">
-            <a href="#" className="btn-floating grey lighten-4 right btn-action-close" onClick={this.handleCloseForm}>
+            <a href="#" className="btn-floating grey lighten-4 right btn-action-close" onClick={this.closeForm}>
               <i className="mdi-navigation-close black-text tiny" aria-hidden="true"></i>
             </a>
-            <a href="#" className="btn-floating green lighten-4 right btn-action-save" onClick={this.handleUsername}>
+            <a href="#" className="btn-floating green lighten-4 right btn-action-save" onClick={this.changeUsername}>
               <i className="mdi-action-done black-text tiny" aria-hidden="true"></i>
             </a>
           </div>
         </div>
       );
     } else {
+      var url = this.props.provider.url;
+      var urlClass = 'red-text lighten-1';
+      if ( this.props.provider.username !== undefined && this.props.provider.username !== true && this.props.provider.username !== '' ) {
+        url = this.props.provider.url.split( '[[username]]' ).join( this.props.provider.username );
+        urlClass = '';
+      }
       return (
         <p className="truncate">
-          <a href={this.props.provider.url} className="red-text lighten-1" target="_blank" onClick={this.handleOpenForm}>{this.props.provider.url}</a>
+          <a href={url} className={urlClass} target="_blank" onClick={this.openForm}>{url}</a>
         </p>
       );
     }
@@ -205,13 +209,27 @@ var OAuthProviderUrlWithUsername = React.createClass({
 });
 
 var OAuthProvider = React.createClass({
+  getInitialState: function() {
+    return {
+      formOpen: false
+    };
+  },
+  toggleForm: function(e) {
+    e.preventDefault();
+    this.handleFormOpen( !this.state.formOpen );
+  },
+  handleFormOpen: function( open ) {
+    this.setState({
+      formOpen: open
+    });
+  },
   render: function() {
     var needUsername;
     var providerUrl;
     if ( this.props.provider.username !== undefined ) {
       var tooltipTitle = this.props.provider.name + ' url need account name';
-      needUsername = <i className="mdi-social-person right tooltipped" data-position="top" data-delay="1" data-tooltip={tooltipTitle}></i>;
-      providerUrl = <OAuthProviderUrlWithUsername {...this.props} />;
+      needUsername = <i className="mdi-social-person right tooltipped cursor" data-position="top" data-delay="1" data-tooltip={tooltipTitle} onClick={this.toggleForm}></i>;
+      providerUrl = <OAuthProviderUrlWithUsername {...this.props} handleFormOpen={this.handleFormOpen} open={this.state.formOpen} />;
     } else {
       providerUrl = <OAuthProviderUrl {...this.props} />;
     }

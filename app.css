@@ -7,6 +7,9 @@ h1 {
 a {
   color: #009cca;
 }
+.cursor {
+  cursor: pointer;
+}
 .blue-creative-area {
   color: #009cca;
 }
