@@ -32,4 +32,12 @@ var OAuthProvidersData = [{
   "url": "https://trello.com/[[username]]/account",
   "favicon": "https://trello.com/favicon.ico",
   "username": true
+},{
+  "name": "LinkedIn",
+  "url": "https://www.linkedin.com/secure/settings?userAgree=",
+  "favicon": "https://www.linkedin.com/favicon.ico"
+},{
+  "name": "Viadeo",
+  "url": "http://www.viadeo.com/settings/privacy/?tab=applications",
+  "favicon": "https://www.viadeo.com/favicon.ico"
 }];
