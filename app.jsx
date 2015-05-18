@@ -44,10 +44,56 @@ var OAuthAuthorizedServicesStore = {
   }
 };
 
+// Providers collection
+var ProviderStore = {
+  data: OAuthProvidersData.sort( function( a, b ) {
+    return ( a.name > b.name ) ? 1 : -1;
+  }),
+  indexedData: {},
+  init: function() {
+    for ( var i = 0 ; i < this.data.length ; i++ ) {
+      this.indexedData[ this.data[i].name ] = i;
+      if ( this.data[i].username === true ) {
+        var username = OAuthAuthorizedServicesStore.get( this.data[i].name + '_username' );
+        if ( username ) {
+          this.setUsername( this.data[i].name, username );
+        }
+      }
+    }
+  },
+  get: function( name ) {
+    if ( this.indexedData[ name ] === undefined ) {
+      return {};
+    }
+    return this.data[ this.indexedData[ name ] ];
+  },
+  getByIndex: function( index ) {
+    return this.data[ index ];
+  },
+  getUsername: function( name ) {
+    return this.get( name ).username;
+  },
+  setUsername: function( name, username ) {
+    this.get( name ).username = username;
+    OAuthAuthorizedServicesStore.set( name + '_username', username );
+  },
+  needUsername: function( name ) {
+    return ( this.getUsername( name ) !== undefined );
+  },
+  validUsername: function( name ) {
+    var username = this.getUsername( name );
+    return ( username !== undefined && username !== true && username !== '' );
+  },
+  usernameUrl: function( name ) {
+    return this.get( name ).url.split( '[[username]]' ).join( this.getUsername( name ) );
+  }
+};
+ProviderStore.init();
+
+
 // React components
 var OAuthAuthorizedServicesWebsite = React.createClass({
   getInitialState: function() {
-    OAuthAuthorizedServicesStore.updateProviders( OAuthProvidersData );
     var whyOpenedSavedState = OAuthAuthorizedServicesStore.get( 'whyOpened' );
     if ( whyOpenedSavedState === undefined ) {
       whyOpenedSavedState = true;
@@ -132,7 +178,7 @@ var OAuthProviders = React.createClass({
   render: function() {
     var rows = [];
     this.props.providers.forEach(function(provider, i) {
-      provider.index = i;
+      // provider.index = i;
       rows.push(<OAuthProvider provider={provider} key={provider.name} />);
     });
     return (
@@ -158,9 +204,7 @@ var OAuthProviderUrl = React.createClass({
 
 var OAuthProviderUrlWithUsername = React.createClass({
   openForm: function(e) {
-    if ( this.props.provider.username !== undefined && this.props.provider.username !== true && this.props.provider.username !== '' ) {
-      // go link
-    } else {
+    if ( !ProviderStore.validUsername( this.props.provider.name ) ) {
       e.preventDefault();
       this.props.handleFormOpen( true );
     }
@@ -172,7 +216,7 @@ var OAuthProviderUrlWithUsername = React.createClass({
   changeUsername: function(e) {
     e.preventDefault();
     var username = this.refs.usernameInput.getDOMNode().value;
-    OAuthAuthorizedServicesStore.updateProvider( OAuthProvidersData, this.props.provider.index, username );
+    ProviderStore.setUsername( this.props.provider.name, username );
     this.props.handleFormOpen( false );
   },
   render: function() {
@@ -195,8 +239,8 @@ var OAuthProviderUrlWithUsername = React.createClass({
     } else {
       var url = this.props.provider.url;
       var urlClass = 'red-text lighten-1';
-      if ( this.props.provider.username !== undefined && this.props.provider.username !== true && this.props.provider.username !== '' ) {
-        url = this.props.provider.url.split( '[[username]]' ).join( this.props.provider.username );
+      if ( ProviderStore.validUsername( this.props.provider.name ) ) {
+        url = ProviderStore.usernameUrl( this.props.provider.name );
         urlClass = '';
       }
       return (
@@ -226,7 +270,7 @@ var OAuthProvider = React.createClass({
   render: function() {
     var needUsername;
     var providerUrl;
-    if ( this.props.provider.username !== undefined ) {
+    if ( ProviderStore.needUsername( this.props.provider.name ) ) {
       var tooltipTitle = this.props.provider.name + ' url need account name';
       needUsername = <i className="mdi-social-person right tooltipped cursor" data-position="top" data-delay="1" data-tooltip={tooltipTitle} onClick={this.toggleForm}></i>;
       providerUrl = <OAuthProviderUrlWithUsername {...this.props} handleFormOpen={this.handleFormOpen} open={this.state.formOpen} />;
